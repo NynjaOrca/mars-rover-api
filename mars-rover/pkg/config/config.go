@@ -45,7 +45,7 @@ func New() (Config, error) {
 		return Config{}, fmt.Errorf("NASA Config: %v", err)
 	}
 
-	return Config{}, nil
+	return c, nil
 }
 
 func buildPostgresConfig() (Postgres, error) {

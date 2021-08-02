@@ -24,5 +24,6 @@ func main() {
 		log.Fatal(fmt.Errorf("unable to build api: %v", err))
 	}
 
-	fmt.Printf("api constructed: %v\n", app)
+	fmt.Println("api constructed: OK")
+	app.LastTenDays("2021-01-02", "NAVCAM")
 }
