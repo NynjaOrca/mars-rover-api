@@ -18,6 +18,7 @@ func main() {
 	if err != nil {
 		log.Fatal(fmt.Errorf("unable to build dao: %v", err))
 	}
+	defer dao.DB.Close()
 
 	app, err := api.New(conf, dao)
 	if err != nil {
