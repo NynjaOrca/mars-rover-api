@@ -2,8 +2,10 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	_ "github.com/lib/pq"
+	"log"
 	"mars-rover-api/mars-rover/pkg/config"
 )
 
@@ -13,7 +15,9 @@ type Postgres struct {
 }
 
 type DAO interface {
-	FetchRoverImages(earthDate, camera string) error
+	InsertRoverImages(images []string, earthDate, camera string) error
+	FetchRoverImages(earthDate, camera string) ([]string, error)
+	EnsureTables() error
 }
 
 func New(c config.Postgres) (*Postgres, error) {
@@ -56,17 +60,42 @@ func (p *Postgres) EnsureTables() error {
 	return nil
 }
 
-func (p *Postgres) FetchRoverImages(earthDate, camera string) error {
+func (p *Postgres) FetchRoverImages(earthDate, camera string) ([]string, error) {
 	q := `SELECT * FROM daily_images WHERE earth_date = $1 and camera = $2`
 	rows, err := p.DB.Query(q, earthDate, camera)
+	if err != nil {
+		return nil, err
+	}
+
+	var ed string
+	var cm string
+	var img images
+	if rows != nil {
+		for rows.Next() {
+			err = rows.Scan(&ed, &cm, &img)
+			if err != nil {
+				return nil, err
+			}
+		}
+	}
+	return img, nil
+}
+
+func (p *Postgres) InsertRoverImages(images []string, earthDate, camera string) error {
+	q := `INSERT INTO daily_images(earth_date, camera, images) 
+			VALUES($1, $2, $3)`
+
+	b, err := json.Marshal(images)
+	result, err := p.DB.Exec(q, earthDate, camera, b)
 	if err != nil {
 		return err
 	}
 
-	if rows != nil {
-		for rows.Next() {
-			// TODO: scan each row into a model
-		}
+	n, err := result.RowsAffected()
+	if err != nil {
+		return err
+	} else {
+		log.Println("number of rows inserted into mongo:", n)
 	}
 	return nil
 }

@@ -18,7 +18,6 @@ func main() {
 	if err != nil {
 		log.Fatal(fmt.Errorf("unable to build dao: %v", err))
 	}
-	defer dao.DB.Close()
 
 	app, err := api.New(conf, dao)
 	if err != nil {
@@ -26,5 +25,9 @@ func main() {
 	}
 
 	fmt.Println("api constructed: OK")
-	app.LastTenDays("2021-01-02", "NAVCAM")
+	app.LastTenDays("NAVCAM")
+	err = dao.DB.Close()
+	if err != nil {
+		log.Println("error disconnecting db: ", err)
+	}
 }
