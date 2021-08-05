@@ -7,15 +7,17 @@
 * Postgres
 
 <h2>Running The Application</h2>
+
 ```sh 
 git clone https://github.com/NynjaOrca/mars-rover-api.git
 ```
 
-```sh 
+```sh
 go run mars-rover/cmd/svr/main.go
 ```
 
 <h2>Output</h2>
+
 ```json
 [
  {
