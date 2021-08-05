@@ -83,7 +83,8 @@ func (p *Postgres) FetchRoverImages(earthDate, camera string) ([]string, error) 
 
 func (p *Postgres) InsertRoverImages(images []string, earthDate, camera string) error {
 	q := `INSERT INTO daily_images(earth_date, camera, images) 
-			VALUES($1, $2, $3)`
+			VALUES($1, $2, $3) ON CONFLICT (earth_date)
+			DO NOTHING`
 
 	b, err := json.Marshal(images)
 	result, err := p.DB.Exec(q, earthDate, camera, b)
@@ -95,7 +96,9 @@ func (p *Postgres) InsertRoverImages(images []string, earthDate, camera string) 
 	if err != nil {
 		return err
 	} else {
-		log.Println("number of rows inserted into mongo:", n)
+		if n != 0 {
+			log.Println("number of rows inserted into mongo:", n)
+		}
 	}
 	return nil
 }

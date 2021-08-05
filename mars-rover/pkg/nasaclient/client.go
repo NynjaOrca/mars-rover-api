@@ -50,9 +50,6 @@ func (c *Client) GetRoverImages(earthDate, camera string) []string {
 		return images
 	}
 
-	xRateLimitRemaining := resp.Header.Get("X-RateLimit-Remaining")
-	log.Println("xRateLimitRemaining:", xRateLimitRemaining)
-
 	var nasaResponse models.NasaResponse
 	err = json.Unmarshal(readBody(resp), &nasaResponse)
 	if err != nil {

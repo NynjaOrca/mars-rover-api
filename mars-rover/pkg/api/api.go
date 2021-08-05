@@ -1,11 +1,11 @@
 package api
 
 import (
-	"fmt"
 	"log"
 	"mars-rover-api/mars-rover/pkg/config"
 	"mars-rover-api/mars-rover/pkg/db"
 	"mars-rover-api/mars-rover/pkg/nasaclient"
+	"sort"
 	"time"
 )
 
@@ -17,6 +17,11 @@ type API struct {
 	Config     config.Config
 	NasaClient nasaclient.Client
 	Postgres   db.DAO
+}
+
+type DailyImage struct {
+	EarthDate string
+	Images    []string
 }
 
 func New(c config.Config, dao db.DAO) (*API, error) {
@@ -33,21 +38,17 @@ func buildMap() map[string][]string {
 	t := time.Now()
 	m := make(map[string][]string, 0)
 	m[t.Format(earthDateFormat)] = []string{}
-	fmt.Println("i:", 0, "t:", t)
 
 	for i := 1; i < 10; i++ {
 		t = t.Add(time.Hour * -24)
-		fmt.Println("i:", i, "t:", t)
 		m[t.Format(earthDateFormat)] = []string{}
 	}
-	fmt.Println(m)
 	return m
 }
 
-func (a *API) LastTenDays(camera string) {
-	m := buildMap()
-	for k, v := range buildMap() {
-		fmt.Println("k", k, "m", v)
+func (a *API) LastTenDays(camera string) []DailyImage {
+	var dailyImages []DailyImage
+	for k, _ := range buildMap() {
 		images, err := a.Postgres.FetchRoverImages(k, camera)
 		if err != nil {
 			log.Println("api - error fetching images:", err)
@@ -62,8 +63,15 @@ func (a *API) LastTenDays(camera string) {
 				log.Println("unable to insert rover images:", err)
 			}
 		}
-
-		m[k] = images
+		dailyImages = append(dailyImages, DailyImage{
+			EarthDate: k,
+			Images:    images,
+		})
 	}
-	fmt.Println("final map:", m)
+
+	sort.Slice(dailyImages, func(i, j int) bool {
+		return dailyImages[i].EarthDate > dailyImages[j].EarthDate
+	})
+
+	return dailyImages
 }

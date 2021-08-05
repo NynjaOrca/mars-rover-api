@@ -24,10 +24,7 @@ func main() {
 		log.Fatal(fmt.Errorf("unable to build api: %v", err))
 	}
 
-	fmt.Println("api constructed: OK")
-	app.LastTenDays("NAVCAM")
-	err = dao.DB.Close()
-	if err != nil {
-		log.Println("error disconnecting db: ", err)
-	}
+	d := app.LastTenDays("NAVCAM")
+	_ = dao.DB.Close()
+	log.Println(d)
 }
