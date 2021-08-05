@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"mars-rover-api/mars-rover/pkg/api"
@@ -26,5 +27,6 @@ func main() {
 
 	d := app.LastTenDays("NAVCAM")
 	_ = dao.DB.Close()
-	log.Println(d)
+	e, err := json.MarshalIndent(d, "", " ")
+	log.Println(string(e))
 }
